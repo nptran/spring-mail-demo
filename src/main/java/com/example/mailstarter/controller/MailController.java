@@ -1,6 +1,7 @@
 package com.example.mailstarter.controller;
 
 import com.example.mailstarter.config.MailInformation;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,12 +15,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.File;
 
 /**
  * mailstarter
  * phuc.tranngoc created on 8/13/2020
  */
 @Controller
+@RequestMapping("/autoEmail")
 public class MailController {
 
     @Autowired
@@ -45,15 +48,16 @@ public class MailController {
     @ResponseBody
     @GetMapping("/sendAttachmentMail")
     public String sendAttachmentMail(@RequestParam String receiver) throws MessagingException {
-        FileSystemResource file1 =new FileSystemResource("C:\\Users\\phuc.tranngoc\\Desktop\\a1.txt");
-        FileSystemResource file2 =new FileSystemResource("C:\\Users\\phuc.tranngoc\\Desktop\\a2.txt");
+        FileSystemResource file1 = new FileSystemResource(new File("E:\\a1.jpg"));
+        FileSystemResource file2 = new FileSystemResource(new File("E:\\a2.jpg"));
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
 
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setFrom(MailInformation.USERNAME);
         helper.setTo(receiver);
         helper.setSubject("Test for sending an attachment mail message");
-        helper.setText("This is an attachment email.",false);
+        helper.setText("This is an attachment email.", false);
         helper.addAttachment("Đính kèm 1", file1);
         helper.addAttachment("Đính kèm 2", file2);
 
@@ -67,12 +71,13 @@ public class MailController {
     public String sendHTMLMail(@RequestParam String receiver) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         String htmlMsg = "<h3>Im testing send a HTML email</h3>"
-                +"<img src='http://www.apache.org/images/asf_logo_wide.gif'>";
+                + "<img src='http://www.apache.org/images/asf_logo_wide.gif'>";
 
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setFrom(MailInformation.USERNAME);
         helper.setTo(receiver);
         helper.setSubject("Test for sending a HTML mail message");
-        helper.setText(htmlMsg,true);
+        helper.setText(htmlMsg, true);
 
         this.mailSender.send(mimeMessage);
 
