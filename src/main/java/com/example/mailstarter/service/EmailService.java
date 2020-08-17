@@ -1,6 +1,10 @@
 package com.example.mailstarter.service;
 
+import com.example.mailstarter.entity.AttachedEmail;
+import com.example.mailstarter.entity.BaseEmail;
+
 import javax.mail.MessagingException;
+import java.io.File;
 
 /**
  * spring-mail-demo
@@ -8,10 +12,10 @@ import javax.mail.MessagingException;
  */
 public interface EmailService {
 
-    public void sendSimpleEmail(String receiver, String subject, String content);
+    public void sendSimpleEmail(BaseEmail email);
 
-    public void sendHTMLEmail(String receiver, String subject, String htmlContent) throws MessagingException;
+    public void sendHTMLEmail(BaseEmail email) throws MessagingException;
 
-    public void sendAttachedEmail(String receiver, String subject, String content) throws MessagingException;
+    public void sendAttachedEmail(AttachedEmail attachedEmail) throws MessagingException;
 
 }
