@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class MailEnvelope {
 
-    private List<String> receivers;
+    private String receiver;
 
     private String subject;
 

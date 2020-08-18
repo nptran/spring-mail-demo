@@ -28,9 +28,17 @@ public class MailController {
     }
 
     @PostMapping("/sendMimeMessage")
-    public ResponseEntity<Void> sendMimeMessage(@RequestBody MailEnvelope envelope) throws MessagingException, UnsupportedEncodingException {
-        mailService.sendMimeMessage(envelope);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Long> sendMimeMessage(@RequestBody MailEnvelope envelope) throws MessagingException, UnsupportedEncodingException {
+        long startTime = System.nanoTime();
+        mailService.sendMimeMessage(envelope, "boybibo98@gmail.com");
+        mailService.sendMimeMessage(envelope, "lamngungo@gmail.com");
+        mailService.sendMimeMessage(envelope, "lowelowe1998@gmail.com");
+        mailService.sendMimeMessage(envelope, "nptran9810@gmail.com");
+        mailService.sendMimeMessage(envelope, "minhdat98hy@gmail.com");
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime);
+        return new ResponseEntity<Long>(duration/1000000, HttpStatus.OK);
     }
 
 }

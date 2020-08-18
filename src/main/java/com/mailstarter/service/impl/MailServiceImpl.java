@@ -8,6 +8,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -29,22 +30,23 @@ public class MailServiceImpl implements MailService {
     public void sendSimpleMessage(MailEnvelope envelope) {
         // Create a simple mail message.
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setTo(envelope.getReceiver());
         simpleMailMessage.setFrom(SenderInformation.USERNAME);
         simpleMailMessage.setSubject("SIMPLE EMAIL - " + envelope.getSubject());
         simpleMailMessage.setText(envelope.getContent());
 
         // Send to receivers
-        for(String _receiver: envelope.getReceivers()) {
-            simpleMailMessage.setTo(_receiver);
-            this.mailSender.send(simpleMailMessage);
-        }
+        this.mailSender.send(simpleMailMessage);
     }
 
     @Override
-    public void sendMimeMessage(MailEnvelope envelope) throws MessagingException, UnsupportedEncodingException {
+    @Async
+    public void sendMimeMessage(MailEnvelope envelope, String receiver) throws MessagingException, UnsupportedEncodingException {
+        System.err.println("Send to "+receiver);
         // Create a mime mail message.
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setTo(receiver);
         helper.setFrom(SenderInformation.USERNAME, SenderInformation.SIGNATURE);
         helper.setSubject("ATTACHED EMAIL - " + envelope.getSubject());
         helper.setText(envelope.getContent(), true);
@@ -59,9 +61,6 @@ public class MailServiceImpl implements MailService {
         }
 
         // Send to receivers
-        for(String _receiver: envelope.getReceivers()) {
-            helper.setTo(_receiver);
-            this.mailSender.send(mimeMessage);
-        }
+        this.mailSender.send(mimeMessage);
     }
 }

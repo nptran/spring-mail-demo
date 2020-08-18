@@ -13,6 +13,6 @@ public interface MailService {
 
     public void sendSimpleMessage(MailEnvelope envelope);
 
-    public void sendMimeMessage(MailEnvelope envelope) throws MessagingException, UnsupportedEncodingException;
+    public void sendMimeMessage(MailEnvelope envelope, String receiver) throws MessagingException, UnsupportedEncodingException;
 
 }
