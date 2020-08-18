@@ -14,7 +14,7 @@ import java.util.Properties;
  * It can be set on `application.properties` too.
  */
 @Configuration
-public class EmailConfig {
+public class MailServerConfig {
 
 //    @Bean
 //    public JavaMailSender getJavaMailSender() {

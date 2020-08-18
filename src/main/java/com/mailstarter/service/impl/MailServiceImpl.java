@@ -1,8 +1,8 @@
 package com.mailstarter.service.impl;
 
-import com.mailstarter.config.EmailInformation;
-import com.mailstarter.entity.EmailEnvelope;
-import com.mailstarter.service.EmailService;
+import com.mailstarter.config.SenderInformation;
+import com.mailstarter.entity.MailEnvelope;
+import com.mailstarter.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 
 /**
@@ -19,18 +20,16 @@ import java.util.Objects;
  * phuc.tranngoc created on 8/17/2020
  */
 @Service
-public class EmailServiceImpl implements EmailService {
+public class MailServiceImpl implements MailService {
 
     @Autowired
     private JavaMailSender mailSender;
 
-    private static final String FROM_EMAIL = EmailInformation.USERNAME;
-
     @Override
-    public void sendSimpleMessage(EmailEnvelope envelope) {
+    public void sendSimpleMessage(MailEnvelope envelope) {
         // Create a simple mail message.
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom(FROM_EMAIL);
+        simpleMailMessage.setFrom(SenderInformation.USERNAME);
         simpleMailMessage.setSubject("SIMPLE EMAIL - " + envelope.getSubject());
         simpleMailMessage.setText(envelope.getContent());
 
@@ -42,11 +41,11 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMimeMessage(EmailEnvelope envelope) throws MessagingException {
+    public void sendMimeMessage(MailEnvelope envelope) throws MessagingException, UnsupportedEncodingException {
         // Create a mime mail message.
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-        helper.setFrom(FROM_EMAIL);
+        helper.setFrom(SenderInformation.USERNAME, SenderInformation.SIGNATURE);
         helper.setSubject("ATTACHED EMAIL - " + envelope.getSubject());
         helper.setText(envelope.getContent(), true);
 

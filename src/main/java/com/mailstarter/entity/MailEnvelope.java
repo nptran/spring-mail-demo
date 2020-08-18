@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailEnvelope {
+public class MailEnvelope {
 
     private List<String> receivers;
 
