@@ -1,2 +1,2 @@
 # spring-mail-demo
-A project about sending email via Spring Boot
+A project about sending message via Spring Boot
