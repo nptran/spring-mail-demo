@@ -1,8 +1,9 @@
 package com.mailstarter.service.impl;
 
-import com.mailstarter.config.SenderInformation;
-import com.mailstarter.entity.MailEnvelope;
+import com.mailstarter.config.MailConfig;
+import com.mailstarter.entity.MailDto;
 import com.mailstarter.service.MailService;
+import com.sun.javafx.collections.MappingChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -10,10 +11,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -26,14 +32,17 @@ public class MailServiceImpl implements MailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private SpringTemplateEngine templateEngine;
+
     @Override
-    public void sendSimpleMessage(MailEnvelope envelope) {
+    public void sendSimpleMessage(MailDto email) {
         // Create a simple mail message.
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setTo(envelope.getReceiver());
-        simpleMailMessage.setFrom(SenderInformation.USERNAME);
-        simpleMailMessage.setSubject("SIMPLE EMAIL - " + envelope.getSubject());
-        simpleMailMessage.setText(envelope.getContent());
+        simpleMailMessage.setTo(email.getReceiver());
+        simpleMailMessage.setFrom(MailConfig.USERNAME);
+        simpleMailMessage.setSubject("SIMPLE EMAIL - " + email.getSubject());
+        simpleMailMessage.setText(email.getStaticContent());
 
         // Send to receivers
         this.mailSender.send(simpleMailMessage);
@@ -41,26 +50,53 @@ public class MailServiceImpl implements MailService {
 
     @Override
     @Async
-    public void sendMimeMessage(MailEnvelope envelope, String receiver) throws MessagingException, UnsupportedEncodingException {
-        System.err.println("Send to "+receiver);
+    public void sendMimeMessage(MailDto email, String receiver) throws MessagingException, UnsupportedEncodingException {
+        System.err.println("Send to " + receiver);
         // Create a mime mail message.
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
         helper.setTo(receiver);
-        helper.setFrom(SenderInformation.USERNAME, SenderInformation.SIGNATURE);
-        helper.setSubject("ATTACHED EMAIL - " + envelope.getSubject());
-        helper.setText(envelope.getContent(), true);
+        helper.setFrom(MailConfig.USERNAME, MailConfig.SIGNATURE);
+        helper.setSubject("ATTACHED EMAIL - " + email.getSubject());
+        helper.setText(email.getStaticContent(), true);
+        addAttachments(email, helper);
+        // Send to receivers
+        this.mailSender.send(mimeMessage);
+    }
 
+    @Override
+    @Async
+    public void sendTemplateMessage(MailDto email, String receiver) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+        mimeMessageHelper.setTo(receiver);
+        mimeMessageHelper.setFrom(MailConfig.USERNAME, MailConfig.SIGNATURE);
+        mimeMessageHelper.setSubject("TEMPLATE EMAIL - " + email.getSubject());
+
+        // Set Template
+        Context context = new Context();
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "Phuc");
+        map.put("code", "FHEUT4HFNSJA");
+        email.setDynamicContents(map);
+        context.setVariables(email.getDynamicContents());
+        String htmlTemplate = templateEngine.process("mail-template", context);
+        mimeMessageHelper.setText(htmlTemplate, true);
+
+        addAttachments(email, mimeMessageHelper);
+
+        mailSender.send(message);
+    }
+
+    private void addAttachments(MailDto email, MimeMessageHelper helper) throws MessagingException {
         // Add attachments if it's available
-        if (Objects.nonNull(envelope.getAttachmentPaths())) {
-            for (String path : envelope.getAttachmentPaths()
+        if (Objects.nonNull(email.getAttachmentPaths())) {
+            for (String path : email.getAttachmentPaths()
             ) {
                 FileSystemResource file = new FileSystemResource(path);
                 helper.addAttachment(Objects.requireNonNull(file.getFilename()), file);
             }
         }
-
-        // Send to receivers
-        this.mailSender.send(mimeMessage);
     }
 }

@@ -1,10 +1,11 @@
 package com.mailstarter.controller;
 
-import com.mailstarter.entity.MailEnvelope;
+import com.mailstarter.entity.MailDto;
 import com.mailstarter.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -22,13 +23,16 @@ public class MailController {
     private MailService mailService;
 
     @PostMapping("/sendSimpleMessage")
-    public ResponseEntity<Void> sendSimpleMessage(@RequestBody MailEnvelope envelope) {
+    public ResponseEntity<Void> sendSimpleMessage(@RequestBody MailDto envelope) {
         mailService.sendSimpleMessage(envelope);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/sendMimeMessage")
-    public ResponseEntity<Long> sendMimeMessage(@RequestBody MailEnvelope envelope) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<?> sendMimeMessage(@RequestBody MailDto envelope, Errors errors) throws MessagingException, UnsupportedEncodingException {
+        if (errors.hasErrors()) {
+            return new ResponseEntity<>(errors.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
         long startTime = System.nanoTime();
         mailService.sendMimeMessage(envelope, "boybibo98@gmail.com");
         mailService.sendMimeMessage(envelope, "lamngungo@gmail.com");
@@ -38,7 +42,21 @@ public class MailController {
 
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
-        return new ResponseEntity<Long>(duration/1000000, HttpStatus.OK);
+        return new ResponseEntity<>(duration/1000000, HttpStatus.OK);
     }
+
+    @PostMapping("/sendTemplateMessage")
+    public ResponseEntity<?> sendTemplateMessage(@RequestBody MailDto email, Errors errors) throws MessagingException, UnsupportedEncodingException {
+        if (errors.hasErrors()) {
+            return new ResponseEntity<>(errors.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+        long startTime = System.nanoTime();
+        mailService.sendTemplateMessage(email, "nptran9810@gmail.com");
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime);
+        return new ResponseEntity<>(duration/1000000, HttpStatus.OK);
+    }
+
 
 }

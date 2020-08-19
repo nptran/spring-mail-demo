@@ -1,6 +1,6 @@
 package com.mailstarter.service;
 
-import com.mailstarter.entity.MailEnvelope;
+import com.mailstarter.entity.MailDto;
 
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
@@ -11,8 +11,10 @@ import java.io.UnsupportedEncodingException;
  */
 public interface MailService {
 
-    public void sendSimpleMessage(MailEnvelope envelope);
+    public void sendSimpleMessage(MailDto email);
 
-    public void sendMimeMessage(MailEnvelope envelope, String receiver) throws MessagingException, UnsupportedEncodingException;
+    public void sendMimeMessage(MailDto email, String receiver) throws MessagingException, UnsupportedEncodingException;
+
+    public void sendTemplateMessage(MailDto email, String receiver) throws MessagingException, UnsupportedEncodingException;
 
 }
