@@ -3,7 +3,6 @@ package com.mailstarter.service.impl;
 import com.mailstarter.config.MailConfig;
 import com.mailstarter.entity.MailDto;
 import com.mailstarter.service.MailService;
-import com.sun.javafx.collections.MappingChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,8 +10,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -33,7 +32,7 @@ public class MailServiceImpl implements MailService {
     private JavaMailSender mailSender;
 
     @Autowired
-    private SpringTemplateEngine templateEngine;
+    private TemplateEngine templateEngine;
 
     @Override
     public void sendSimpleMessage(MailDto email) {
@@ -67,13 +66,6 @@ public class MailServiceImpl implements MailService {
     @Override
     @Async
     public void sendTemplateMessage(MailDto email, String receiver) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
-
-        mimeMessageHelper.setTo(receiver);
-        mimeMessageHelper.setFrom(MailConfig.USERNAME, MailConfig.SIGNATURE);
-        mimeMessageHelper.setSubject("TEMPLATE EMAIL - " + email.getSubject());
-
         // Set Template
         Context context = new Context();
         Map<String, Object> map = new HashMap<>();
@@ -81,11 +73,22 @@ public class MailServiceImpl implements MailService {
         map.put("code", "FHEUT4HFNSJA");
         email.setDynamicContents(map);
         context.setVariables(email.getDynamicContents());
-        String htmlTemplate = templateEngine.process("mail-template", context);
-        mimeMessageHelper.setText(htmlTemplate, true);
+        String htmlTemplate = templateEngine.process("email/activation", context);
 
+        sendPreparedMail(email, receiver, htmlTemplate);
+
+    }
+
+    private void sendPreparedMail(MailDto email,String receiver, String htmlContent) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, true);
+
+        mimeMessageHelper.setTo(receiver);
+        mimeMessageHelper.setFrom(MailConfig.USERNAME, MailConfig.SIGNATURE);
+        mimeMessageHelper.setSubject("TEMPLATE EMAIL - " + email.getSubject());
+
+        mimeMessageHelper.setText(htmlContent, true);
         addAttachments(email, mimeMessageHelper);
-
         mailSender.send(message);
     }
 

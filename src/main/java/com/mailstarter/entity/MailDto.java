@@ -3,9 +3,7 @@ package com.mailstarter.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +16,7 @@ import java.util.Map;
 public class MailDto {
 
     private String receiver;
-    @NotNull
+
     private String subject;
 
     private String staticContent;

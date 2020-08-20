@@ -29,10 +29,8 @@ public class MailController {
     }
 
     @PostMapping("/sendMimeMessage")
-    public ResponseEntity<?> sendMimeMessage(@RequestBody MailDto envelope, Errors errors) throws MessagingException, UnsupportedEncodingException {
-        if (errors.hasErrors()) {
-            return new ResponseEntity<>(errors.getAllErrors(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> sendMimeMessage(@RequestBody MailDto envelope) throws MessagingException, UnsupportedEncodingException {
+
         long startTime = System.nanoTime();
         mailService.sendMimeMessage(envelope, "boybibo98@gmail.com");
         mailService.sendMimeMessage(envelope, "lamngungo@gmail.com");
@@ -46,12 +44,13 @@ public class MailController {
     }
 
     @PostMapping("/sendTemplateMessage")
-    public ResponseEntity<?> sendTemplateMessage(@RequestBody MailDto email, Errors errors) throws MessagingException, UnsupportedEncodingException {
-        if (errors.hasErrors()) {
-            return new ResponseEntity<>(errors.getAllErrors(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> sendTemplateMessage(@RequestBody MailDto email) throws MessagingException, UnsupportedEncodingException {
         long startTime = System.nanoTime();
         mailService.sendTemplateMessage(email, "nptran9810@gmail.com");
+        mailService.sendTemplateMessage(email, "boybibo98@gmail.com");
+        mailService.sendTemplateMessage(email, "lamngungo@gmail.com");
+        mailService.sendTemplateMessage(email, "lowelowe1998@gmail.com");
+        mailService.sendTemplateMessage(email, "minhdat98hy@gmail.com");
 
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
