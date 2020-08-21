@@ -64,7 +64,7 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    @Async
+//    @Async
     public void sendTemplateMessage(MailDto email, String receiver) throws MessagingException, UnsupportedEncodingException {
         // Set Template
         Context context = new Context();
